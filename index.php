@@ -1,12 +1,20 @@
 <?php
     require('functions.php');
 
+    $errors = [];
+
     if($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['login'])){
         $email = sanitize_input($_POST['email']);
         $password = sanitize_input($_POST['password']);
-        $user;
-    }
+        $user = users($email, $password);
 
+        if(empty($errors)){
+            $user = users($email, $password);
+            header('Location: admin/dashboard.php');
+        } else {
+            $notification = "<li>invalid username or password<li>";
+        }
+    }
 
 
 ?>
@@ -24,7 +32,14 @@
 <body class="bg-secondary-subtle">
     <div class="d-flex align-items-center justify-content-center vh-100">
         <div class="col-3">
-            
+            <?php if (!empty($notification)): ?>
+                <div class="mb-3">
+                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                        <strong>System Error:</strong> <?php echo $notification; ?>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                </div>
+            <?php endif; ?>
             <div class="card">
                 <div class="card-body">
                     <h1 class="h3 mb-4 fw-normal">Login</h1>
