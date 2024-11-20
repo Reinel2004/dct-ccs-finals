@@ -10,32 +10,12 @@
 
         return $conn;
     }
-
-    function users($email, $password){
-        $conn = con();
-        $hashedpw = md5($password);
-    
-        $sql = "SELECT * FROM users WHERE email = ? AND password = ?";
-        $stmt = mysqli_prepare($conn, $sql);
-        
-        mysqli_stmt_bind_param($stmt, "ss", $email, $hashedpw);
-        mysqli_stmt_execute($stmt);
-        
-        $result = mysqli_stmt_get_result($stmt);
-        $user = mysqli_fetch_assoc($result);
-        
-        mysqli_stmt_close($stmt);
-        mysqli_close($conn);
-    
-        return $user;
-    }
-
+    // sanitize input
     function sanitize_input($data) {
-        $data = trim($data);
-        $data = stripslashes($data);
-        $data = htmlspecialchars($data);
-        return $data;
+        return htmlspecialchars(stripslashes(trim($data)));
     }
+
+    
 
     function validateLoginCredentials($email, $password) {
         $errors = [];
@@ -49,31 +29,6 @@
         if (empty($password)) {
             $errors[] = "Password is required.";
         }
-    
-        if (empty($errors)) {
-            $conn = con(); 
-            $hashedpw = md5($password);
-    
-            $sql = "SELECT * FROM users WHERE email = ? AND password = ?";
-            $stmt = mysqli_prepare($conn, $sql);
-    
-            if ($stmt) {
-                mysqli_stmt_bind_param($stmt, "ss", $email, $hashedpw);
-                mysqli_stmt_execute($stmt);
-                $result = mysqli_stmt_get_result($stmt);
-    
-                if (mysqli_num_rows($result) === 0) {
-                    $errors[] = "Invalid email or password.";
-                }
-    
-                mysqli_stmt_close($stmt);
-            } else {
-                $errors[] = "Query failed.";
-            }
-    
-            mysqli_close($conn);
-        }
-    
         return $errors;
     }
     
@@ -89,16 +44,16 @@
             mysqli_stmt_execute($stmt);
             $result = mysqli_stmt_get_result($stmt);
     
-            if (mysqli_num_rows($result) > 0) {
-                mysqli_stmt_close($stmt);
-                mysqli_close($conn);
-                return true;
-            }
+            $user = mysqli_fetch_assoc($result)
     
             mysqli_stmt_close($stmt);
-        }
+            mysqli_close($conn);
+            return $user ? $user: false;
+
+
+        } 
         mysqli_close($conn);
-        return false; 
+        return false;
     }
     
 
