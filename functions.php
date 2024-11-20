@@ -122,76 +122,129 @@
     }
 
     function checkDuplicateStudentData($student_id) {
-        $conn = conn();
+        $conn = con(); // Establish connection
     
-        $sql = "SELECT * FROM students WHERE student_id = :student_id";
-        $stmt = $conn->prepare($sql);
-    
-        $stmt->bindParam(':student_id', $student_id);
-        $stmt->execute();
-    
-        $existing_student = $stmt->fetch(PDO::FETCH_ASSOC);
-        if ($existing_student) {
-            return ["Duplicate student id"];
-        }
-    
-        return [];
-
-        mysqli_close($conn);
-    }
-
-    function addStudentData($student_id, $student_firstname, $student_lastname){
-        $checkStudentData = validateStudentData($student_id, $student_firstname, $student_lastname);
-        $checkDuplicateData = checkDuplicateStudentData($student_id);
-
-        if(count($checkStudentData) > 0){
-            echo displayErrors($checkStudentData);
-            return;
-        }
-    
-        if(count($checkDuplicateData) == 1){
-            echo displayErrors($checkDuplicateData);
-            return;
-        }
+        $sql = "SELECT student_id FROM students WHERE student_id = ?";
+        $stmt = mysqli_prepare($conn, $sql);
         
+        if ($stmt) {
+            // Bind the parameter
+            mysqli_stmt_bind_param($stmt, "s", $student_id);
+            mysqli_stmt_execute($stmt);
+    
+            $result = mysqli_stmt_get_result($stmt);
+            $existing_student = mysqli_fetch_assoc($result);
+    
+            mysqli_stmt_close($stmt);
+            mysqli_close($conn);
+    
+            // Check if a matching row is found
+            if ($existing_student) {
+                return ["Duplicate Student ID found: " . $student_id];
+            }
+        } else {
+            mysqli_close($conn);
+            return ["Error checking duplicate student ID"];
+        }
+    
+        // No duplicates found
+        return [];
+    }
+    
+    
 
+    function addStudentData($student_id, $student_firstname, $student_lastname) {
+        $checkStudentData = validateStudentData([
+            'student_id' => $student_id,
+            'first_name' => $student_firstname,
+            'last_name' => $student_lastname,
+        ]);
+        $checkDuplicateData = checkDuplicateStudentData($student_id);
+    
+        if (count($checkStudentData) > 0) {
+            echo displayErrors($checkStudentData);
+            return false;
+        }
+    
+        if (count($checkDuplicateData) > 0) {
+            echo displayErrors($checkDuplicateData);
+            return false;
+        }
+    
         $conn = con();
+    
 
-        try{
-            $sql_insert = 'INSERT INTO students(student_id, student_firstname, student_lastname) VALUES (:student_id, :student_firstname, :student_lastname)';
-            $stmt = $conn->prepare($sql_insert);
-
-            $stmt->bindParam(':student_id', $student_id);
-            $stmt->bindParam(':first_name', $student_firstname);
-            $stmt->bindParam(':last_name', $student_lastname);
-
-            if ($stmt->execute()) {
-
+        $sql_insert = "INSERT INTO students (student_id, first_name, last_name) VALUES (?, ?, ?)";
+        $stmt = mysqli_prepare($conn, $sql_insert);
+    
+        if ($stmt) {
+            
+            mysqli_stmt_bind_param($stmt, "sss", $student_id, $student_firstname, $student_lastname);
+    
+         
+            if (mysqli_stmt_execute($stmt)) {
+                mysqli_stmt_close($stmt);
+                mysqli_close($conn);
                 return true;
             } else {
-                return "Error: Can't add data."; 
-            } 
-        } catch(PDOException $e) {
-            return 'Error: ' . $e->getMessage();
+                echo "Error: " . mysqli_error($conn); 
+            }
+        } else {
+            echo "Error preparing statement: " . mysqli_error($conn);
         }
-
+    
+       
         mysqli_close($conn);
+        return false;
     }
     
-    function selectStudents(){
+    
+    function selectStudents() {
         $conn = con();
-
-    try {
+    
         $sql_select = "SELECT * FROM students";
-        $stmt = $conn->prepare($sql_select);
-
-        $stmt->execute();
-
-        $students = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
+        $result = mysqli_query($conn, $sql_select);
+    
+        $students = [];
+        if ($result) {
+            while ($row = mysqli_fetch_assoc($result)) {
+                $students[] = $row;
+            }
+        }
+    
+        mysqli_close($conn);
+    
         return $students;
-    } catch (PDOException $e) {
-        return [];
     }
+
+    function getSelectedStudentById($student_id) {
+        $conn = con();
+    
+        try {
+            $sql = "SELECT * FROM students WHERE student_id = ?";
+            $stmt = mysqli_prepare($conn, $sql);
+    
+            if ($stmt) {
+                mysqli_stmt_bind_param($stmt, "s", $student_id);
+                mysqli_stmt_execute($stmt);
+    
+                $result = mysqli_stmt_get_result($stmt);
+    
+                if ($result && mysqli_num_rows($result) > 0) {
+                    $student = mysqli_fetch_assoc($result);
+                    mysqli_stmt_close($stmt);
+                    mysqli_close($conn);
+                    return $student; 
+                } else {
+                    mysqli_stmt_close($stmt);
+                    mysqli_close($conn);
+                    return null; 
+                }
+            }
+        } catch (Exception $e) {
+           
+            return null;
+        }
     }
+    
 ?>
