@@ -178,4 +178,20 @@
         mysqli_close($conn);
     }
     
+    function selectStudents(){
+        $conn = con();
+
+    try {
+        $sql_select = "SELECT * FROM students";
+        $stmt = $conn->prepare($sql_select);
+
+        $stmt->execute();
+
+        $students = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        return $students;
+    } catch (PDOException $e) {
+        return [];
+    }
+    }
 ?>
