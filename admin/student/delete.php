@@ -21,7 +21,7 @@ if (isset($_GET['student_id'])) {
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['student_id'])) {
     $student_id = sanitize_input($_POST['student_id']);
 
-    $deleteStudent = "";
+    $deleteStudent = deleteStudentById($student_id);
 
     if ($deleteStudent) {
 
