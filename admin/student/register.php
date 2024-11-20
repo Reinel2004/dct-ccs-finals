@@ -11,6 +11,32 @@
 
 
     $errors = [];
+    $student_data = [];
+
+    if (!isset($_SESSION['student_data'])) {
+        $_SESSION['student_data'] = [];
+    }
+    
+    if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+        $student_data = [
+            'student_id' => $_POST['student_id'],
+            'first_name' => $_POST['first_name'],
+            'last_name' => $_POST['last_name']
+        ];
+    
+        $errors = validateStudentData($student_data);
+    
+        if (empty($errors)) {
+            $duplicate_index = getSelectedStudentIndex($student_data['student_id']);
+            if ($duplicate_index !== null) {
+                $errors[] = "Duplicate Student ID";
+            } else {
+                $_SESSION['student_data'][] = $student_data;
+                header("Location: register.php");
+                exit;
+            }
+        }
+    }
     
 
 
@@ -31,7 +57,18 @@
                 </ol>
             </nav>
             <hr>
-
+            <br>
+            <?php if (!empty($errors)): ?>
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <strong>System Errors</strong>
+                    <ul>
+                        <?php foreach ($errors as $error): ?>
+                            <li><?php echo htmlspecialchars($error); ?></li>
+                        <?php endforeach; ?>
+                    </ul>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            <?php endif; ?>
             <form action="register.php" method="post">
                 <div class="form-group">
                     <label for="student_id">Student ID</label>
