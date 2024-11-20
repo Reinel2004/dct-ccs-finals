@@ -120,4 +120,62 @@
         return $errors;
     
     }
+
+    function checkDuplicateStudentData($student_id) {
+        $conn = conn();
+    
+        $sql = "SELECT * FROM students WHERE student_id = :student_id";
+        $stmt = $conn->prepare($sql);
+    
+        $stmt->bindParam(':student_id', $student_id);
+        $stmt->execute();
+    
+        $existing_student = $stmt->fetch(PDO::FETCH_ASSOC);
+        if ($existing_student) {
+            return ["Duplicate student id"];
+        }
+    
+        return [];
+
+        mysqli_close($conn);
+    }
+
+    function addStudentData($student_id, $student_firstname, $student_lastname){
+        $checkStudentData = validateStudentData($student_id, $student_firstname, $student_lastname);
+        $checkDuplicateData = checkDuplicateStudentData($student_id);
+
+        if(count($checkStudentData) > 0){
+            echo displayErrors($checkStudentData);
+            return;
+        }
+    
+        if(count($checkDuplicateData) == 1){
+            echo displayErrors($checkDuplicateData);
+            return;
+        }
+        
+
+        $conn = con();
+
+        try{
+            $sql_insert = 'INSERT INTO students(student_id, student_firstname, student_lastname) VALUES (:student_id, :student_firstname, :student_lastname)';
+            $stmt = $conn->prepare($sql_insert);
+
+            $stmt->bindParam(':student_id', $student_id);
+            $stmt->bindParam(':first_name', $student_firstname);
+            $stmt->bindParam(':last_name', $student_lastname);
+
+            if ($stmt->execute()) {
+
+                return true;
+            } else {
+                return "Error: Can't add data."; 
+            } 
+        } catch(PDOException $e) {
+            return 'Error: ' . $e->getMessage();
+        }
+
+        mysqli_close($conn);
+    }
+    
 ?>
