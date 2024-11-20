@@ -247,4 +247,41 @@
         }
     }
     
+    function fetchStudentById($student_id) {
+        $result = executeQuery("SELECT * FROM students WHERE student_id = ?", [$student_id], true);
+        return $result[0] ?? null;
+    }
+    
+    function updateStudentData($studentData) {
+        $sql = "UPDATE students SET first_name = ?, last_name = ? WHERE student_id = ?";
+        return executeQuery($sql, [$studentData['first_name'], $studentData['last_name'], $studentData['student_id']]);
+    }
+    
+    function executeQuery($sql, $params, $isSelect = false) {
+        $conn = con();
+        $stmt = mysqli_prepare($conn, $sql);
+    
+        if ($stmt) {
+            mysqli_stmt_bind_param($stmt, str_repeat("s", count($params)), ...$params);
+            mysqli_stmt_execute($stmt);
+    
+            if ($isSelect) {
+                $result = mysqli_stmt_get_result($stmt);
+                $data = [];
+                while ($row = mysqli_fetch_assoc($result)) {
+                    $data[] = $row;
+                }
+                mysqli_stmt_close($stmt);
+                mysqli_close($conn);
+                return $data;
+            }
+    
+            mysqli_stmt_close($stmt);
+            mysqli_close($conn);
+            return true;
+        }
+    
+        handleDatabaseError("Error executing query", $conn);
+    }
+    
 ?>
