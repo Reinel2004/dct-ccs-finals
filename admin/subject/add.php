@@ -1,8 +1,51 @@
 <?php
     session_start();
     $pageTitle = "Add Subject";
+      
     include('../partials/header.php'); 
     include('../../functions.php');
+
+    if (!empty($_SESSION['email'])) {
+        header("Location: ../../index.php");
+        exit;
+    }
+
+    $errors = [];
+    $subject_data = [];
+
+
+    if (!isset($_SESSION['subject_data'])) {
+        $_SESSION['subject_data'] = [];
+    }
+    
+    if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+        $subject_data = [
+            'subject_code' => $_POST['subject_code'],
+            'subject_name' => $_POST['subject_name']
+        ];
+    
+        $errors = validateSubjectData($subject_data);
+    
+        
+        foreach ($_SESSION['subject_data'] as $existingSubject) {
+            if ($existingSubject['subject_code'] === $subject_data['subject_code']) {
+                $errors[] = "Duplicate Subject";
+                break;
+            }
+            if ($existingSubject['subject_name'] === $subject_data['subject_name']) {
+                $errors[] = "Duplicate Subject";
+                break;
+            }
+        }
+    
+        if (empty($errors)) {
+            $_SESSION['subject_data'][] = $subject_data;
+            header("Location: add.php");
+            exit;
+        }
+    }
+
+
 
 ?>
 
