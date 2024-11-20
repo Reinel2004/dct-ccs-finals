@@ -15,7 +15,6 @@
         return htmlspecialchars(stripslashes(trim($data)));
     }
 
-    
 
     function validateLoginCredentials($email, $password) {
         $errors = [];
@@ -56,5 +55,13 @@
         return false;
     }
     
+    function displayErrors($errors) {
+        $output = "<ul>";
+        foreach ($errors as $error) {
+            $output .= "<li>" . htmlspecialchars($error) . "</li>";
+        }
+        $output .= "</ul>";
+        return $output;
+    }
 
 ?>
