@@ -1,36 +1,38 @@
 <?php
+    session_start();
+    $pageTitle = "Log in";
+   
+    if (empty($_SESSION['email'])) {
+        header("Location: admin/dashboard.php");
+        exit;
+    }
+
     require 'functions.php';
 
-    session_start();
    
-//    if (!empty($_SESSION['email'])) {
-//        header("Location: admin/dashboard.php");
-//        exit;
-//    }
-   
-   $errors = [];
-   $notification = null;
-   
-   if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-       $email = sanitize_input(($_POST['email'] ?? ''));
-       $password = sanitize_input(($_POST['password'] ?? ''));
+    $errors = [];
+    $notification = null;
 
-       $errors = validateLoginCredentials($email, $password);
+    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+        $email = sanitize_input(($_POST['email'] ?? ''));
+        $password = sanitize_input(($_POST['password'] ?? ''));
+
+        $errors = validateLoginCredentials($email, $password);
 
 
-       if (empty($errors)) {
-           if (checkLoginCredentials($email, $password)) {
-               $_SESSION['email'] = $email;
-               header('Location: admin/dashboard.php');
-               exit;
-           } else {
-               $notification = "Invalid email or password.";
-           }
-       }
-       else{
-        $notification = " ";
-       }
-   }
+        if (empty($errors)) {
+            if (checkLoginCredentials($email, $password)) {
+                $_SESSION['email'] = $email;
+                header('Location: admin/dashboard.php');
+                exit;
+            } else {
+                $notification = "Invalid email or password.";
+            }
+        }
+        else{
+        $notification = displayErrors($errors);
+        }
+    }
 ?>
 
 
