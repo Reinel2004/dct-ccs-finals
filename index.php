@@ -1,19 +1,39 @@
 <?php
     require('functions.php');
+    session_start();
+
+    if (!empty($_SESSION['email'])) {
+        header("Location: dashboard.php");
+        exit;
+    }
 
     $errors = [];
+    $notification = null;
 
-    if($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['login'])){
-        $email = sanitize_input($_POST['email']);
-        $password = sanitize_input($_POST['password']);
+
+    
+
+    if($_SERVER['REQUEST_METHOD'] === 'POST'){
+        $email = sanitize_input($_POST['email'] ?? '');
+        $password = sanitize_input($_POST['password'] ?? '');
         $user = users($email, $password);
 
+
+        $errors = validateLoginCredentials($email, $password);
+        
         if(empty($errors)){
             $user = users($email, $password);
-            header('Location: admin/dashboard.php');
-        } else {
-            $notification = "<li>invalid username or password<li>";
-        }
+            if(checkLoginCredentials($email, $password)){
+                $_SESSION['email'] = $email;
+                header('Location: admin/dashboard.php');
+                exit;
+            } else {
+                $notification = "<li>invalid username or password<li>";
+            }
+        } 
+    }
+    else {
+        $notification = "dasdasds ";
     }
 
 
@@ -35,7 +55,7 @@
             <?php if (!empty($notification)): ?>
                 <div class="mb-3">
                     <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                        <strong>System Error:</strong> <?php echo $notification; ?>
+                        <strong>Error:</strong> <?php echo $notification; ?>
                         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                     </div>
                 </div>
