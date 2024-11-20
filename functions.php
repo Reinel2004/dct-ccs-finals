@@ -64,4 +64,12 @@
         return $output;
     }
 
+    function logOut($loginForm){
+        unset($_SESSION['email']);
+
+        
+        session_destroy();
+        header("Location: $loginForm");
+        exit;
+    }
 ?>
