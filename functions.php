@@ -75,7 +75,7 @@
 
 
     function guard() {
-        $indexPage = 'index.php'
+        $indexPage = 'index.php';
         if (empty($_SESSION['email']) && basename($_SERVER['PHP_SELF']) != $indexPage) {
             header("Location: $indexPage"); 
             exit;
@@ -90,5 +90,34 @@
             exit;
         }
     }
+
+    function validateSubjectData($subject_data) {
+        $errors = [];
+        if (empty($subject_data['subject_code'])) {
+            $errors[] = "Subject Code is required.";
+        }
+        if (empty($subject_data['subject_name'])) {
+            $errors[] = "Subject Name is required.";
+        }
+        return $errors;
+    }
     
+
+    function validateStudentData($student_data) {
+   
+        $errors = [];
+        if (empty($student_data['student_id'])) {
+            $errors[] = "Student ID is required.";
+        }
+        if (empty($student_data['first_name'])) {
+            $errors[] = "First Name is required.";
+        }
+    
+        if (empty($student_data['last_name'])) {
+            $errors[] = "Last Name is required.";
+        }
+    
+        return $errors;
+    
+    }
 ?>
