@@ -284,4 +284,25 @@
         handleDatabaseError("Error executing query", $conn);
     }
     
+    function deleteStudentById($student_id) {
+        $conn = con(); 
+    
+        $sql = "DELETE FROM students WHERE student_id = ?";
+        $stmt = mysqli_prepare($conn, $sql);
+    
+        if ($stmt) {
+            mysqli_stmt_bind_param($stmt, "s", $student_id);
+            $executionResult = mysqli_stmt_execute($stmt);
+    
+            mysqli_stmt_close($stmt);
+            mysqli_close($conn);
+    
+            return $executionResult; 
+        } else {
+            handleDatabaseError("Error preparing delete query", $conn);
+        }
+        mysqli_close($conn);
+        return false; 
+    }
+    
 ?>
