@@ -375,5 +375,89 @@
     }
 
 
+    function getSubjectByCode($subject_code){
+        $conn = con();
+        $sql = "SELECT * FROM subjects WHERE subject_code = ?";
+        $stmt = mysqli_prepare($conn, $sql);
+        $subject = null;
+
+        if ($stmt) {
+            mysqli_stmt_bind_param($stmt, "s", $subject_code);
+            mysqli_stmt_execute($stmt);
+            $result = mysqli_stmt_get_result($stmt);
+            $subject = mysqli_fetch_assoc($result);
+            mysqli_stmt_close($stmt);
+        }
+
+        mysqli_close($conn);
+        return $subject;
+    }
+
+   
+    function updateSubjectData($subject_code, $subject_name) {
+   
+        $errors = [];
+        if (empty($subject_code)) {
+            $errors[] = "Subject Code is required.";
+        }
+        if (empty($subject_name)) {
+            $errors[] = "Subject Name is required.";
+        }
+        if (!empty($errors)) {
+            echo displayErrors($errors);
+            return false;
+        }
+    
+        $conn = con();
+    
+        $sql_update = "UPDATE subjects SET subject_name = ? WHERE subject_code = ?";
+        $stmt = mysqli_prepare($conn, $sql_update);
+    
+        if ($stmt) {
+            mysqli_stmt_bind_param($stmt, "ss", $subject_name, $subject_code);
+            if (mysqli_stmt_execute($stmt)) {
+                mysqli_stmt_close($stmt);
+                mysqli_close($conn);
+                return true; 
+
+                echo "Error: " . mysqli_error($conn);
+            }
+        } else {
+            echo "Error preparing statement: " . mysqli_error($conn);
+        }
+    
+        mysqli_close($conn);
+        return false; 
+    }
+
+    function getSelectedSubjectByCode($subject_code) {
+        $conn = con();
+        $sql = "SELECT * FROM subjects WHERE subject_code = ?";
+        $stmt = mysqli_prepare($conn, $sql);
+    
+        if ($stmt) {
+            mysqli_stmt_bind_param($stmt, "s", $subject_code);
+            mysqli_stmt_execute($stmt);
+    
+            $result = mysqli_stmt_get_result($stmt);
+    
+            if ($result && mysqli_num_rows($result) > 0) {
+                $subject = mysqli_fetch_assoc($result);
+                mysqli_stmt_close($stmt);
+                mysqli_close($conn);
+                return $subject;
+            } else {
+                mysqli_stmt_close($stmt);
+                mysqli_close($conn);
+                return null;
+            }
+        }
+    
+        mysqli_close($conn);
+        return null; 
+    }
+    
+
+
     
 ?>
