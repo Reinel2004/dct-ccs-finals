@@ -98,19 +98,26 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <tr>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td>
-                            <a href="#" class="btn btn-info btn-sm">Edit</a>
-                            <a href="#" class="btn btn-danger btn-sm">Delete</a>
-                            <a href="#" class="btn btn-secondary btn-sm">Attach Subject</a>
-                        </td>
-                    </tr>
+                    <?php
+                        $students = selectStudents();
+                        if(!empty($students)):?>
+                            <?php foreach($students as $student): ?>
+                                <tr>
+                                    <td><?php echo htmlspecialchars($student['student_id']); ?></td>
+                                    <td><?php echo htmlspecialchars($student['first_name']); ?></td>
+                                    <td><?php echo htmlspecialchars($student['last_name']); ?></td>
+                                    <td>
+                                        <a href="#" class="btn btn-info btn-sm">Edit</a>
+                                        <a href="#" class="btn btn-danger btn-sm">Delete</a>
+                                        <a href="#" class="btn btn-secondary btn-sm">Attach Subject</a>
+                                    </td>
+                                </tr>
+                            <?php endforeach; ?>
+                        <?php else: ?>
                     <tr>
                         <td colspan="4" class="text-center">No student records found.</td>
                     </tr>
+                        <?php endif; ?>
                 </tbody>
             </table>
         </div>
