@@ -1,4 +1,3 @@
-
 <?php
     session_start();
     $pageTitle = "Edit Subject";
@@ -10,12 +9,44 @@
     //     exit;
     // }
 
-
     $errors = [];
     $subjectToEdit = null;
-    $subjectIndex = null;
+
+   
+    if (isset($_GET['subject_code'])) {
+        $subject_code = sanitize_input($_GET['subject_code']);
+        
+      
+        $subjectToEdit = getSelectedSubjectByCode($subject_code);  
+        
+        if (!$subjectToEdit) {
+            $errors[] = "Subject not found.";
+        }
+    } else {
+        $errors[] = "No subject code provided.";
+    }
 
     
+    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+        $subject_code = sanitize_input($_POST['subject_code']);
+        $subject_name = sanitize_input($_POST['subject_name']);
+        
+        if (empty($subject_name)) {
+            $errors[] = "Subject Name is required.";
+        }
+
+       
+        if (count($errors) === 0) {
+       
+            if (updateSubjectData($subject_code, $subject_name)) {
+              
+                header("Location: add.php"); 
+                exit;
+            } else {
+                $errors[] = "Failed to update subject.";
+            }
+        }
+    }
 ?>
 
 <div class="container">
@@ -35,6 +66,7 @@
             <hr>
             <br>
 
+          
             <?php if (!empty($errors)): ?>
                 <div class="alert alert-danger">
                     <strong>System Errors</strong>
@@ -47,6 +79,7 @@
                 </div>
             <?php endif; ?>
 
+          
             <?php if ($subjectToEdit): ?>
                 <form action="edit.php?subject_code=<?= urlencode($subjectToEdit['subject_code']) ?>" method="post">
                     <div class="form-group">
@@ -66,7 +99,6 @@
             <?php endif; ?>
         </div>
     </div>
-    
 </div>
 
 <?php include('../partials/footer.php'); ?>
