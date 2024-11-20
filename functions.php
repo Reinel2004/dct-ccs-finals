@@ -304,5 +304,76 @@
         mysqli_close($conn);
         return false; 
     }
+
+    
+    function addSubjectData($subject_code, $subject_name) {
+        $subject_data = [
+            'subject_code' => $subject_code,
+            'subject_name' => $subject_name
+        ];
+
+        $checkSubjectData = validateSubjectData($subject_data);
+
+        if (count($checkSubjectData) > 0) {
+            echo displayErrors($checkSubjectData);
+            return false;
+        }
+
+        $checkDuplicateSubject = checkDuplicateSubjectData($subject_code);
+        if (count($checkDuplicateSubject) > 0) {
+            echo displayErrors($checkDuplicateSubject);
+            return false;
+        }
+
+        $conn = con();
+        $sql_insert = "INSERT INTO subjects (subject_code, subject_name) VALUES (?, ?)";
+        $stmt = mysqli_prepare($conn, $sql_insert);
+
+        if ($stmt) {
+            mysqli_stmt_bind_param($stmt, "ss", $subject_code, $subject_name);
+            if (mysqli_stmt_execute($stmt)) {
+                mysqli_stmt_close($stmt);
+                mysqli_close($conn);
+                return true; 
+            } else {
+                echo "Error: " . mysqli_error($conn);
+            }
+        } else {
+            echo "Error: " . mysqli_error($conn);
+        }
+
+        mysqli_close($conn);
+        return false; 
+    }
+
+   
+    function checkDuplicateSubjectData($subject_code) {
+        $conn = con();
+
+        $sql = "SELECT subject_code FROM subjects WHERE subject_code = ?";
+        $stmt = mysqli_prepare($conn, $sql);
+
+        if ($stmt) {
+            mysqli_stmt_bind_param($stmt, "s", $subject_code);
+            mysqli_stmt_execute($stmt);
+
+            $result = mysqli_stmt_get_result($stmt);
+            $existing_subject = mysqli_fetch_assoc($result);
+
+            mysqli_stmt_close($stmt);
+            mysqli_close($conn);
+
+            if ($existing_subject) {
+                return ["Duplicate Subject Code found: " . $subject_code];
+            }
+        } else {
+            mysqli_close($conn);
+            return ["Error checking duplicate subject code"];
+        }
+
+        return [];
+    }
+
+
     
 ?>
