@@ -19,21 +19,32 @@
     
     if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $student_data = [
-            'student_id' => $_POST['student_id'],
-            'first_name' => $_POST['first_name'],
-            'last_name' => $_POST['last_name']
+            'student_id' => sanitize_input($_POST['student_id']),
+            'first_name' => sanitize_input($_POST['first_name']),
+            'last_name' => sanitize_input($_POST['last_name']),
         ];
     
         $errors = validateStudentData($student_data);
     
+       
         if (empty($errors)) {
-            $duplicate_index = getSelectedStudentIndex($student_data['student_id']);
-            if ($duplicate_index !== null) {
-                $errors[] = "Duplicate Student ID";
+            $duplicate_errors = checkDuplicateStudentData($student_data['student_id']);
+            if (!empty($duplicate_errors)) {
+                $errors = array_merge($errors, $duplicate_errors);
             } else {
-                $_SESSION['student_data'][] = $student_data;
-                header("Location: register.php");
-                exit;
+             
+                $added = addStudentData(
+                    $student_data['student_id'],
+                    $student_data['first_name'],
+                    $student_data['last_name']
+                );
+    
+                if ($added) {
+                    header("Location: register.php");
+                    exit;
+                } else {
+                    $errors[] = "Failed to add the student. Please try again.";
+                }
             }
         }
     }
