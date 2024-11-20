@@ -1,58 +1,44 @@
 <?php
-session_start();
+    session_start();
     $pageTitle = "Edit Student";
     include('../../functions.php');
     include('../partials/header.php'); 
 
-    // if (empty($_SESSION['email'])) {
-    //     header("Location: ../../index.php");
-    //     exit;
-    // }
 
     $errors = [];
     $studentToEdit = null;
 
-  
     if (isset($_GET['student_id'])) {
-        $student_id = $_GET['student_id'];
-
-        foreach ($_SESSION['student_data'] as $key => $student) {
-            if ($student['student_id'] === $student_id) {
-                $studentToEdit = $student;
-                break;
-            }
-        }
+        $student_id = sanitize_input($_GET['student_id']);
+        $studentToEdit = getSelectedStudentById($student_id); 
 
         if (!$studentToEdit) {
             $errors[] = "Student not found.";
         }
     }
 
+    // Handle form submission
     if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['student_id'])) {
         $updatedData = [
-            'student_id' => $_POST['student_id'],
-            'first_name' => $_POST['first_name'],
-            'last_name' => $_POST['last_name']
+            'student_id' => sanitize_input($_POST['student_id']),
+            'first_name' => sanitize_input($_POST['first_name']),
+            'last_name' => sanitize_input($_POST['last_name'])
         ];
 
-        if (empty($updatedData['first_name'])) {
-            $errors[] = "First Name is required.";
-        }
 
-        if (empty($updatedData['last_name'])) {
-            $errors[] = "Last Name is required.";
-        }
+        $validationErrors = validateStudentData($updatedData);
+        $errors = array_merge($errors, $validationErrors);
 
+      
         if (empty($errors)) {
-            foreach ($_SESSION['student_data'] as $key => $student) {
-                if ($student['student_id'] === $updatedData['student_id']) {
-                    $_SESSION['student_data'][$key] = $updatedData;
-                    break;
-                }
-            }
+            $updateStatus = updateStudentData($updatedData);
 
-            header("Location: register.php");
-            exit;
+            if ($updateStatus) {
+                header("Location: register.php");
+                exit;
+            } else {
+                $errors[] = "Failed to update the student record.";
+            }
         }
     }
 ?>
@@ -74,7 +60,7 @@ session_start();
             <hr>
             <br>
 
-            <!-- Display errors if any -->
+           
             <?php if (!empty($errors)): ?>
                 <div class="alert alert-danger">
                     <ul>
