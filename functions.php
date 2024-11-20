@@ -72,4 +72,23 @@
         header("Location: $loginForm");
         exit;
     }
+
+
+    function guard() {
+        $indexPage = 'index.php'
+        if (empty($_SESSION['email']) && basename($_SERVER['PHP_SELF']) != $indexPage) {
+            header("Location: $indexPage"); 
+            exit;
+        }
+    }
+
+    function checkUserSessionIsActive() {
+        $dashboardPage = 'admin/dashboard.php';
+        $indexPage = 'index.php';
+        if (isset($_SESSION['email']) && basename($_SERVER['PHP_SELF']) == $indexPage) {
+            header("Location: $dashboardPage");
+            exit;
+        }
+    }
+    
 ?>
