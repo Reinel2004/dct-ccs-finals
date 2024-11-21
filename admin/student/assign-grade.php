@@ -82,7 +82,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['grade'])) {
                         <label for="grade" class="form-label">Grade</label>
                         <input type="number" class="form-control" id="grade" name="grade" min="0" max="100" required>
                         <br>
-                        <button type="button" class="btn btn-secondary" onclick="window.location.href='register.php';">Cancel</button>
+                        <button type="button" class="btn btn-secondary" onclick="window.location.href='attach-subject.php?student_id=<?= htmlspecialchars($student['student_id']); ?>'">
+                            Cancel
+                        </button>
                         <button type="submit" class="btn btn-primary">Assign Grade to Subject</button>
                     </form>
                 </div>
