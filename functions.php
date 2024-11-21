@@ -662,6 +662,33 @@
             return false; 
         }
     }
+
+    function assignGradeToStudent($student_id, $subject_id, $grade) {
+        $conn = con();
+        $sql = "UPDATE students_subjects SET grade = ? WHERE student_id = ? AND subject_id = ?";
+    
+        $stmt = mysqli_prepare($conn, $sql);
+        if ($stmt) {
+            mysqli_stmt_bind_param($stmt, "dii", $grade, $student_id, $subject_id);
+            mysqli_stmt_execute($stmt);
+    
+            if (mysqli_stmt_affected_rows($stmt) > 0) {
+                mysqli_stmt_close($stmt);
+                mysqli_close($conn);
+                return true; 
+            } else {
+                error_log("Failed to update grade: " . mysqli_error($conn));
+                mysqli_stmt_close($stmt);
+                mysqli_close($conn);
+                return false; 
+            }
+        } else {
+            error_log("Failed to prepare statement: " . mysqli_error($conn));
+            mysqli_close($conn);
+            return false; 
+        }
+    }
+    
     
     
     
