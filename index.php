@@ -3,7 +3,7 @@
     require 'functions.php';
     $pageTitle = "Log in";
    
-    if (!empty($_SESSION['email'])) {
+    if (isset($_SESSION['email'])) {
         header("Location: admin/dashboard.php");
         exit;
     }
