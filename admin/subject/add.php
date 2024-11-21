@@ -1,35 +1,39 @@
 <?php
-    session_start();
-    $pageTitle = "Add Subject";
-    include('../../functions.php');
-    include('../partials/header.php'); 
+session_start();
+$pageTitle = "Add Subject";
+include('../../functions.php');
+include('../partials/header.php');
 
-    $errors = [];
+$errors = [];
 
-    if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    
-        $subject_data = [
-            'subject_code' => sanitize_input($_POST['subject_code']),
-            'subject_name' => sanitize_input($_POST['subject_name'])
-        ];
+if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+    $subject_data = [
+        'subject_code' => sanitize_input($_POST['subject_code']),
+        'subject_name' => sanitize_input($_POST['subject_name'])
+    ];
 
-    
-        $result = addSubjectData($subject_data);
-
-        if ($result === true) {
-            header("Location: add.php");
-            exit;
-        } else {
-            $errors = $result;
-        }
+    // Add the new subject to the session
+    if (!isset($_SESSION['subject_data'])) {
+        $_SESSION['subject_data'] = [];
     }
 
+    $_SESSION['subject_data'][] = $subject_data;
 
-    $conn = con();
-    $sql = "SELECT * FROM subjects";
-    $result = mysqli_query($conn, $sql);
-    $subjects = mysqli_fetch_all($result, MYSQLI_ASSOC);
-    mysqli_close($conn);
+    $result = addSubjectData($subject_data);
+
+    if ($result === true) {
+        header("Location: add.php");
+        exit;
+    } else {
+        $errors = $result;
+    }
+}
+
+$conn = con();
+$sql = "SELECT * FROM subjects";
+$result = mysqli_query($conn, $sql);
+$subjects = mysqli_fetch_all($result, MYSQLI_ASSOC);
+mysqli_close($conn);
 ?>
 
 <div class="container">
