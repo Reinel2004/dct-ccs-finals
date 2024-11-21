@@ -1,155 +1,141 @@
 <?php
 session_start();
-$pageTitle = "Attach Subject";
-require_once '../../functions.php';
-require_once '../partials/header.php';
+$pageTitle = "Attach Subject to Student";
 
-$studentToAttach = null;
+include '../partials/header.php';
+include '../../functions.php';
+
+// Uncomment the session validation if necessary
+// if (empty($_SESSION['email'])) {
+//     header("Location: ../index.php");
+//     exit;
+// }
+
+// header("Cache-Control: no-store, no-cache, must-revalidate");
+// header("Cache-Control: post-check=0, pre-check=0", false);
+// header("Pragma: no-cache");
+
+$student_id = $_GET['student_id'] ?? null;
 $errors = [];
 
-// Load subjects into the session from the database if not already set
-if (!isset($_SESSION['subject_data']) || empty($_SESSION['subject_data'])) {
-    $conn = con();
-    $sql = "SELECT * FROM subjects";
-    $result = mysqli_query($conn, $sql);
-    $_SESSION['subject_data'] = mysqli_fetch_all($result, MYSQLI_ASSOC);
-    mysqli_close($conn);
-}
+// Fetch selected student data
+$studentToAttach = $student_id ? getSelectedStudentById($student_id) : null;
 
-// Retrieve student ID from GET or POST
-if (isset($_GET['student_id'])) {
-    $student_id = sanitize_input($_GET['student_id']);
-} elseif (isset($_POST['student_id'])) {
-    $student_id = sanitize_input($_POST['student_id']);
-} else {
-    $errors[] = "No student selected.";
-}
-
-// Find the selected student in the session data
-if (!empty($student_id)) {
-    if (!empty($_SESSION['student_data'])) {
-        foreach ($_SESSION['student_data'] as $student) {
-            if ($student['student_id'] === $student_id) {
-                $studentToAttach = $student;
-                break;
-            }
-        }
-    }
-    if (!$studentToAttach) {
-        $errors[] = "Student not found.";
-    }
-} else {
-    $errors[] = "Student ID is missing.";
-}
-
-// Handle form submission
+// Handle form submission for attaching subjects
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     if (isset($_POST['subject_codes']) && !empty($_POST['subject_codes'])) {
-        // Sanitize and collect selected subject codes
-        $subject_codes = array_map('sanitize_input', $_POST['subject_codes']);
+        foreach ($_POST['subject_codes'] as $subject_code) {
+            $subject_id = getSubjectIdByCode($subject_code);
 
-        // Ensure the session is prepared for subject attachment
-        if (!isset($_SESSION['attached_subjects'])) {
-            $_SESSION['attached_subjects'] = [];
+            if ($subject_id && attachSubjectToStudent($student_id, $subject_id)) {
+                // Successfully attached subject, continue to next
+                continue;
+            } else {
+                $errors[] = "Failed to attach subject with code: $subject_code.";
+            }
         }
-
-        if (!isset($_SESSION['attached_subjects'][$student_id])) {
-            $_SESSION['attached_subjects'][$student_id] = [];
-        }
-
-        // Attach subjects and ensure no duplicates
-        $_SESSION['attached_subjects'][$student_id] = array_unique(
-            array_merge($_SESSION['attached_subjects'][$student_id], $subject_codes)
-        );
     } else {
         $errors[] = 'At least one subject should be selected.';
     }
 }
 
-?>
+// Fetch attached subjects
+$attachedSubjects = getAttachedSubjectsByStudentId($student_id);
 
+// Fetch all subjects
+$allSubjects = getAllSubjects();
+$attachedSubjectCodes = array_column($attachedSubjects, 'subject_code');
+$availableSubjects = array_filter($allSubjects, function ($subject) use ($attachedSubjectCodes) {
+    return !in_array($subject['subject_code'], $attachedSubjectCodes);
+});
+?>
 
 <div class="container">
     <div class="row">
         <?php include('../partials/side-bar.php'); ?>
         <div class="col-lg-10 col-md-9 mt-5">
             <h2>Attach Subject to Student</h2>
+            <br>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="../dashboard.php">Dashboard</a></li>
+                    <li class="breadcrumb-item"><a href="register.php">Register Student</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">Attach Subject to Student</li>
+                </ol>
+            </nav>
+            <hr>
+            <br>
 
             <?php if (!empty($errors)): ?>
-                <div class="alert alert-danger">
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <strong>System Errors</strong>
                     <ul>
                         <?php foreach ($errors as $error): ?>
-                            <li><?= htmlspecialchars($error) ?></li>
+                            <li><?php echo htmlspecialchars($error); ?></li>
                         <?php endforeach; ?>
                     </ul>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                 </div>
             <?php endif; ?>
 
             <?php if ($studentToAttach): ?>
-                <h3>Student Details</h3>
-                <ul>
-                    <li><strong>Student ID:</strong> <?= htmlspecialchars($studentToAttach['student_id']) ?></li>
-                    <li><strong>Name:</strong> <?= htmlspecialchars($studentToAttach['first_name'] . ' ' . $studentToAttach['last_name']) ?></li>
-                </ul>
+                <div class="container">
+                    <h3>Selected Student Information</h3>
+                    <ul>
+                        <li><strong>Student ID:</strong> <?= htmlspecialchars($studentToAttach['student_id']) ?></li>
+                        <li><strong>Name:</strong> <?= htmlspecialchars($studentToAttach['first_name'] . ' ' . $studentToAttach['last_name']) ?></li>
+                    </ul>
+                </div>
             <?php endif; ?>
 
+            <hr>
+
             <form method="post">
-                <input type="hidden" name="student_id" value="<?= htmlspecialchars($student_id) ?>">
-
-                <?php if (isset($student_id)): ?>
-
-                    <?php 
-                        $attached_subjects = $_SESSION['attached_subjects'][$student_id] ?? [];
-                        $available_subjects = array_filter($_SESSION['subject_data'], function($subject) use ($attached_subjects) {
-                            return !in_array($subject['subject_code'], $attached_subjects);
-                        });
-                    ?>
-                    
-                
-                    <?php if (!empty($available_subjects)): ?>
-                        <?php foreach ($available_subjects as $subject): ?>
-                            <div>
-                                <input type="checkbox" name="subject_codes[]" value="<?= htmlspecialchars($subject['subject_code']) ?>">
-                                <?= htmlspecialchars($subject['subject_code']) ?> - <?= htmlspecialchars($subject['subject_name']) ?>
-                            </div>
-                        <?php endforeach; ?>
-                        <button type="submit" class="btn btn-primary mt-3">Attach Selected Subjects</button>
-                    <?php else: ?>
-                        <p class="text-warning">All available subjects are already attached to this student.</p>
-                    <?php endif; ?>
+                <?php if (!empty($availableSubjects)): ?>
+                    <h3>Select Subjects to Attach</h3>
+                    <?php foreach ($availableSubjects as $subject): ?>
+                        <div>
+                            <input 
+                                type="checkbox" 
+                                name="subject_codes[]" 
+                                value="<?= htmlspecialchars($subject['subject_code']) ?>"
+                            >
+                            <?= htmlspecialchars($subject['subject_code']) ?> - <?= htmlspecialchars($subject['subject_name']) ?>
+                        </div>
+                    <?php endforeach; ?>
+                    <br>
+                    <button type="submit" class="btn btn-primary">Attach Subjects</button>
                 <?php else: ?>
-                    <p class="text-danger">No student ID provided.</p>
+                    <p>No subjects available to attach.</p>
                 <?php endif; ?>
             </form>
 
-            <h3 class="mt-5">Attached Subjects</h3>
+            <hr>
+            <h3 class="mt-5">Attached Subjects for Student</h3>
             <table class="table">
                 <thead>
                     <tr>
                         <th>Subject Code</th>
                         <th>Subject Name</th>
+                        <th>Grade</th>
+                        <th>Option</th>
                     </tr>
                 </thead>
                 <tbody>
-                    <?php if (!empty($attached_subjects)): ?>
-                        <?php foreach ($attached_subjects as $subject_code): ?>
+                    <?php if (!empty($attachedSubjects)): ?>
+                        <?php foreach ($attachedSubjects as $subject): ?>
                             <tr>
-                                <td><?= htmlspecialchars($subject_code) ?></td>
+                                <td><?= htmlspecialchars($subject['subject_code']); ?></td>
+                                <td><?= htmlspecialchars($subject['subject_name']); ?></td>
                                 <td>
-                                    <?php
-                                    foreach ($_SESSION['subject_data'] as $subject) {
-                                        if ($subject['subject_code'] === $subject_code) {
-                                            echo htmlspecialchars($subject['subject_name']);
-                                            break;
-                                        }
-                                    }
-                                    ?>
+                                    <a href="detach-subject.php?student_id=<?= urlencode($student_id) ?>&subject_id=<?= urlencode($subject['subject_id']) ?>" class="btn btn-danger btn-sm">Detach Subject</a>
                                 </td>
+                                <td><a href="#" class="btn btn-primary btn-sm">Assign Grade</a></td>
                             </tr>
                         <?php endforeach; ?>
                     <?php else: ?>
                         <tr>
-                            <td colspan="2">No subjects attached.</td>
+                            <td colspan="3" class="text-center">No subjects attached.</td>
                         </tr>
                     <?php endif; ?>
                 </tbody>
