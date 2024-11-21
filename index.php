@@ -1,13 +1,14 @@
 <?php
     session_start();
+    require 'functions.php';
     $pageTitle = "Log in";
    
-    if (empty($_SESSION['email'])) {
+    if (!empty($_SESSION['email'])) {
         header("Location: admin/dashboard.php");
         exit;
     }
 
-    require 'functions.php';
+   
 
    
     $errors = [];
