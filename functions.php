@@ -76,9 +76,8 @@
 
 
     function guard() {
-        $indexPage = 'index.php';
-        if (empty($_SESSION['email']) && basename($_SERVER['PHP_SELF']) != $indexPage) {
-            header("Location: $indexPage"); 
+        if (empty($_SESSION['email']) && basename($_SERVER['PHP_SELF']) != 'index.php') {
+            header("Location: index.php"); 
             exit;
         }
     }
