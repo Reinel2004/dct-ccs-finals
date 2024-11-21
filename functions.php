@@ -141,7 +141,7 @@
     
             // Check if a matching row is found
             if ($existing_student) {
-                return ["Duplicate Student ID found: " . $student_id];
+                return ["Duplicate Student ID"];
             }
         } else {
             mysqli_close($conn);
