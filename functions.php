@@ -566,26 +566,31 @@
 
     function countAllSubjects() {
         try {
-            $conn = con();
+            $conn = con(); // Get MySQLi connection
             $sql = "SELECT COUNT(*) AS total_subjects FROM subjects";
             $stmt = $conn->prepare($sql);
             $stmt->execute();
-            $result = $stmt->fetch(PDO::FETCH_ASSOC);
-            return $result['total_subjects'];
-        } catch (PDOException $e) {
+    
+            $result = $stmt->get_result();
+            $row = $result->fetch_assoc(); // Fetch the result as an associative array
+            return $row['total_subjects'];
+        } catch (mysqli_sql_exception $e) {
             return "Error: " . $e->getMessage();
         }
     }
     
+    
     function countAllStudents() {
         try {
-            $conn = con();
+            $conn = con(); // Get MySQLi connection
             $sql = "SELECT COUNT(*) AS total_students FROM students";
             $stmt = $conn->prepare($sql);
             $stmt->execute();
-            $result = $stmt->fetch(PDO::FETCH_ASSOC);
-            return $result['total_students'];
-        } catch (PDOException $e) {
+    
+            $result = $stmt->get_result();
+            $row = $result->fetch_assoc(); // Fetch the result as an associative array
+            return $row['total_students'];
+        } catch (mysqli_sql_exception $e) {
             return "Error: " . $e->getMessage();
         }
     }
