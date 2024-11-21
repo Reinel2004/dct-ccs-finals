@@ -67,11 +67,15 @@ mysqli_close($conn);
             <form method="post">
                 <div class="form-group">
                     <label for="subject_code">Subject Code</label>
-                    <input type="text" class="form-control" id="subject_code" name="subject_code" placeholder="Enter Subject Code">
+                    <input type="text" class="form-control" id="subject_code" name="subject_code" 
+                           placeholder="Enter Subject Code" 
+                           value="<?php echo isset($subject_data['subject_code']) ? htmlspecialchars($subject_data['subject_code']) : ''; ?>">
                 </div>
                 <div class="form-group">
                     <label for="subject_name">Subject Name</label>
-                    <input type="text" class="form-control" id="subject_name" name="subject_name" placeholder="Enter Subject Name">
+                    <input type="text" class="form-control" id="subject_name" name="subject_name" 
+                           placeholder="Enter Subject Name" 
+                           value="<?php echo isset($subject_data['subject_name']) ? htmlspecialchars($subject_data['subject_name']) : ''; ?>">
                 </div>
                 <br>
                 <button type="submit" class="btn btn-primary">Add Subject</button>
