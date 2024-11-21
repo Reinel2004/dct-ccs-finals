@@ -9,7 +9,6 @@
         exit;
     }
 
-
     $errors = [];
     $student_data = [];
 
@@ -26,13 +25,11 @@
     
         $errors = validateStudentData($student_data);
     
-       
         if (empty($errors)) {
             $duplicate_errors = checkDuplicateStudentData($student_data['student_id']);
             if (!empty($duplicate_errors)) {
                 $errors = array_merge($errors, $duplicate_errors);
             } else {
-             
                 $added = addStudentData(
                     $student_data['student_id'],
                     $student_data['first_name'],
@@ -48,15 +45,13 @@
             }
         }
     }
-    
-
 
 ?>
 
 <div class="container-fluid">
     <div class="row">
         <!-- Sidebar Section -->
-            <?php include('../partials/side-bar.php'); ?>
+        <?php include('../partials/side-bar.php'); ?>
         <!-- Main Content Section -->
         <div class="col-lg-10 col-md-9 mt-5">
             <h2>Register a New Student</h2>
@@ -83,21 +78,26 @@
             <form action="register.php" method="post">
                 <div class="form-group">
                     <label for="student_id">Student ID</label>
-                    <input type="text" class="form-control" id="student_id" name="student_id" placeholder="Enter Student ID">
+                    <input type="text" class="form-control" id="student_id" name="student_id" 
+                           placeholder="Enter Student ID" 
+                           value="<?php echo isset($student_data['student_id']) ? htmlspecialchars($student_data['student_id']) : ''; ?>">
                 </div>
                 <div class="form-group mt-3">
                     <label for="first_name">First Name</label>
-                    <input type="text" class="form-control" id="first_name" name="first_name" placeholder="Enter First Name">
+                    <input type="text" class="form-control" id="first_name" name="first_name" 
+                           placeholder="Enter First Name" 
+                           value="<?php echo isset($student_data['first_name']) ? htmlspecialchars($student_data['first_name']) : ''; ?>">
                 </div>
                 <div class="form-group mt-3">
                     <label for="last_name">Last Name</label>
-                    <input type="text" class="form-control" id="last_name" name="last_name" placeholder="Enter Last Name">
+                    <input type="text" class="form-control" id="last_name" name="last_name" 
+                           placeholder="Enter Last Name" 
+                           value="<?php echo isset($student_data['last_name']) ? htmlspecialchars($student_data['last_name']) : ''; ?>">
                 </div>
                 <button type="submit" class="btn btn-primary mt-3">Add Student</button>
             </form>
             <hr>
 
-          
             <h3 class="mt-5">Student List</h3>
             <table class="table table-striped">
                 <thead class="thead-dark">
