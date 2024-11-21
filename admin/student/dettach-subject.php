@@ -4,6 +4,7 @@ $pageTitle = "Detach Subject from Student";
 include '../partials/header.php';
 include '../../functions.php';
 
+// Uncomment session validation if necessary
 // if (empty($_SESSION['email'])) {
 //     header("Location: ../index.php");
 //     exit;
@@ -16,22 +17,25 @@ if (isset($_GET['student_id']) && isset($_GET['subject_code'])) {
     $student_id = $_GET['student_id'];
     $subject_code = $_GET['subject_code'];
 
-  
     $studentToDelete = getSelectedStudentById($student_id);
-
     $subjectToDetach = getSubjectByCode($subject_code);
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['student_id']) && isset($_POST['subject_code'])) {
     $student_id = $_POST['student_id'];
     $subject_code = $_POST['subject_code'];
-
-  
-    if (detachSubjectFromStudent($student_id, $subject_code)) {
-        header("Location: attach-subject.php?student_id=" . urlencode($student_id));
-        exit;
+    
+    $subject = getSubjectByCode($subject_code);
+    if ($subject) {
+        $subject_id = $subject['id'];
+        if (detachSubjectFromStudent($student_id, $subject_id)) {
+            header("Location: attach-subject.php?student_id=" . urlencode($student_id));
+            exit;
+        } else {
+            $_SESSION['error_message'] = "Failed to detach the subject.";
+        }
     } else {
-        $_SESSION['error_message'] = "Failed to detach the subject.";
+        $_SESSION['error_message'] = "Subject not found.";
     }
 }
 ?>
@@ -51,6 +55,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['student_id']) && isse
             </nav>
             <div class="card mt-3">
                 <div class="card-body">
+                    <?php if (isset($_SESSION['error_message'])): ?>
+                        <div class="alert alert-danger">
+                            <?= htmlspecialchars($_SESSION['error_message']); ?>
+                        </div>
+                        <?php unset($_SESSION['error_message']); ?>
+                    <?php endif; ?>
+                    
                     <?php if ($studentToDelete && $subjectToDetach): ?>
                         <h5>Are you sure you want to detach this subject from this student record?</h5>
                         <ul>
