@@ -4,7 +4,7 @@
     include('../../functions.php');
     include('../partials/header.php'); 
 
-    if (!empty($_SESSION['email'])) {
+    if (empty($_SESSION['email'])) {
         header("Location: ../../index.php");
         exit;
     }
