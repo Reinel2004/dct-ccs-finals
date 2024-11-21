@@ -639,27 +639,30 @@
     function detachSubjectFromStudent($student_id, $subject_id) {
         $conn = con();
         $sql = "DELETE FROM students_subjects WHERE student_id = ? AND subject_id = ?";
-        
+    
         $stmt = mysqli_prepare($conn, $sql);
-        
+    
         if ($stmt) {
             mysqli_stmt_bind_param($stmt, "ii", $student_id, $subject_id);
             mysqli_stmt_execute($stmt);
-            
+    
             if (mysqli_stmt_affected_rows($stmt) > 0) {
                 mysqli_stmt_close($stmt);
                 mysqli_close($conn);
                 return true; 
             } else {
+                error_log("No rows affected. Query might have failed.");
                 mysqli_stmt_close($stmt);
                 mysqli_close($conn);
                 return false; 
             }
         } else {
+            error_log("Failed to prepare statement: " . mysqli_error($conn));
             mysqli_close($conn);
             return false; 
         }
     }
+    
     
     
     
