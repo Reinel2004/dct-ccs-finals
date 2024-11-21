@@ -1,7 +1,12 @@
 <?php
     // Logout Code Here
-    include '../functions.php';
     session_start();
-    $loginForm = '../index.php';
-    logOut($loginForm);
+    session_destroy(); 
+
+    header("Cache-Control: no-store, no-cache, must-revalidate"); 
+    header("Cache-Control: post-check=0, pre-check=0", false); 
+    header("Pragma: no-cache");
+
+    header("Location: ../index.php");
+exit;
 ?>
