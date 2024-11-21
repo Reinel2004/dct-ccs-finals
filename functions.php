@@ -486,6 +486,69 @@
         }
     }
 
+    function attachSubjectToStudent($student_id, $subject_code) {
+        $conn = con();
+    
+        $errors = [];
+        if (empty($student_id)) {
+            $errors[] = "Student ID is required.";
+        }
+        if (empty($subject_code)) {
+            $errors[] = "Subject Code is required.";
+        }
+    
+       
+        $student = getSelectedStudentById($student_id);
+        $subject = getSelectedSubjectByCode($subject_code);
+    
+        if (!$student) {
+            $errors[] = "Student ID not found.";
+        }
+        if (!$subject) {
+            $errors[] = "Subject Code not found.";
+        }
+    
+        if (!empty($errors)) {
+            echo displayErrors($errors);
+            return false;
+        }
+    
+       
+        $sql_check = "SELECT * FROM student_subjects WHERE student_id = ? AND subject_code = ?";
+        $stmt_check = mysqli_prepare($conn, $sql_check);
+        mysqli_stmt_bind_param($stmt_check, "ss", $student_id, $subject_code);
+        mysqli_stmt_execute($stmt_check);
+        $result_check = mysqli_stmt_get_result($stmt_check);
+    
+        if (mysqli_num_rows($result_check) > 0) {
+            mysqli_stmt_close($stmt_check);
+            mysqli_close($conn);
+            echo displayErrors(["Subject is already attached to the student."]);
+            return false;
+        }
+        mysqli_stmt_close($stmt_check);
+    
+        $sql = "INSERT INTO student_subjects (student_id, subject_code) VALUES (?, ?)";
+        $stmt = mysqli_prepare($conn, $sql);
+    
+        if ($stmt) {
+            mysqli_stmt_bind_param($stmt, "ss", $student_id, $subject_code);
+            if (mysqli_stmt_execute($stmt)) {
+                mysqli_stmt_close($stmt);
+                mysqli_close($conn);
+                return true; 
+            } else {
+                echo "Error attaching subject: " . mysqli_error($conn);
+            }
+        } else {
+            echo "Error preparing statement: " . mysqli_error($conn);
+        }
+    
+        mysqli_close($conn);
+        return false; 
+    }
+    
+
 
     
 ?>
