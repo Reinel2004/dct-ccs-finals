@@ -82,12 +82,22 @@
         }
     }
 
-    function guardDashboard(){
-        $loginPage = '../index.php';
-        if(!isset($_SESSION['email'])){
-            header("Location: $loginPage");
+    function guardDashboard() {
+        if (session_status() !== PHP_SESSION_ACTIVE) {
+            session_start();
+        }
+    
+        if (empty($_SESSION['email'])) {
+           
+            header("Location: ../index.php"); 
+            exit;
+        }   
+        if (basename($_SERVER['PHP_SELF']) !== 'dashboard.php') {
+            header("Location: dashboard.php");
+            exit;
         }
     }
+    
 
     function checkUserSessionIsActive() {
         $dashboardPage = 'admin/dashboard.php';
@@ -99,9 +109,10 @@
     }
 
     function checkUserSessionIsActiveDashboard() {
-        $dashboardPage = 'admin/dashboard.php';
-        $indexPage = '../index.php';
-        if (isset($_SESSION['email']) && basename($_SERVER['PHP_SELF']) == $indexPage) {
+        $dashboardPage = 'dashboard.php';
+        $currentPage = basename($_SERVER['PHP_SELF']);
+    
+        if (isset($_SESSION['email']) && $currentPage === 'index.php') {
             header("Location: $dashboardPage");
             exit;
         }
