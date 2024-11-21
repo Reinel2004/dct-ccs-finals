@@ -1,4 +1,5 @@
 <?php    
+ 
     // All project functions should be placed here
     function con(){
         
@@ -550,17 +551,20 @@
     }
     
     function getSubjectIdByCode($subject_code) {
-        $conn = con();
-        $sql = "SELECT subject_id FROM subjects WHERE subject_code = ?";
-        $stmt = mysqli_prepare($conn, $sql);
+        $conn = con();  // Database connection
+        
+        // Correct query to fetch subject_id using subject_code
+        $query = "SELECT subject_id FROM subjects WHERE subject_code = ?";
+        $stmt = mysqli_prepare($conn, $query);
         mysqli_stmt_bind_param($stmt, "s", $subject_code);
         mysqli_stmt_execute($stmt);
         $result = mysqli_stmt_get_result($stmt);
-        $subject = mysqli_fetch_assoc($result);
-        mysqli_stmt_close($stmt);
-        mysqli_close($conn);
+        
+        if ($row = mysqli_fetch_assoc($result)) {
+            return $row['subject_id'];  // Return subject_id if found
+        }
     
-        return $subject ? $subject['subject_id'] : null; // Return the subject ID or null if not found
+        return false;
     }
     
 
@@ -594,4 +598,50 @@
             return "Error: " . $e->getMessage();
         }
     }
+    function getAttachedSubjectsByStudentId($student_id) {
+        $conn = con();
+        $subjects = [];
+        
+        // Prepare the SQL query to get subjects attached to the student
+        $sql = "SELECT s.subject_code, s.subject_name
+                FROM subjects s
+                INNER JOIN students_subjects ss ON s.subject_code = ss.subject_id
+                WHERE ss.student_id = ?";
+        
+        $stmt = mysqli_prepare($conn, $sql);
+        
+        if ($stmt) {
+            mysqli_stmt_bind_param($stmt, "s", $student_id);
+            mysqli_stmt_execute($stmt);
+            $result = mysqli_stmt_get_result($stmt);
+            
+            while ($row = mysqli_fetch_assoc($result)) {
+                $subjects[] = $row;
+            }
+    
+            mysqli_stmt_close($stmt);
+        }
+    
+        mysqli_close($conn);
+        return $subjects;
+    }
+    function getAllSubjects() {
+        $conn = con(); // Assuming you have a connection function
+    
+        // Query to fetch all subjects
+        $sql = "SELECT subject_code, subject_name FROM subjects";
+        $result = mysqli_query($conn, $sql);
+    
+        $subjects = [];
+        while ($row = mysqli_fetch_assoc($result)) {
+            $subjects[] = $row;
+        }
+    
+        mysqli_close($conn);
+        return $subjects;
+    }
+    
+    
+    
+    
 ?>
