@@ -545,6 +545,9 @@
         return false;
     }
     
+
+
+    
     function getSubjectIdByCode($subject_code) {
         $conn = con();  // Database connection
         
@@ -561,6 +564,24 @@
     
         return false;
     }
+    function getSelectedSubjectByCode($subject_code) {
+        $conn = con();  // Database connection
+        $sql = "SELECT * FROM subjects WHERE subject_code = ?";
+        $stmt = mysqli_prepare($conn, $sql);
+        $subject = null;
+    
+        if ($stmt) {
+            mysqli_stmt_bind_param($stmt, "s", $subject_code);
+            mysqli_stmt_execute($stmt);
+            $result = mysqli_stmt_get_result($stmt);
+            $subject = mysqli_fetch_assoc($result);
+            mysqli_stmt_close($stmt);
+        }
+    
+        mysqli_close($conn);
+        return $subject;
+    }
+    
     
 
     function countAllSubjects() {
