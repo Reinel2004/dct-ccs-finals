@@ -467,6 +467,25 @@
     }
     
 
+    function deleteSubjectByCode($subject_code) {
+        $conn = con(); 
+        $sql = "DELETE FROM subjects WHERE subject_code = ?";
+        $stmt = mysqli_prepare($conn, $sql);
+    
+        if ($stmt) {
+            mysqli_stmt_bind_param($stmt, "s", $subject_code);
+            $executionResult = mysqli_stmt_execute($stmt);
+            mysqli_stmt_close($stmt);
+            mysqli_close($conn);
+            return $executionResult;
+        } else {
+         
+            echo "Error preparing delete query: " . mysqli_error($conn);
+            mysqli_close($conn);
+            return false;
+        }
+    }
+
 
     
 ?>
