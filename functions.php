@@ -714,15 +714,11 @@
         try {
             $conn = con(); 
     
-            $sql = "SELECT 
-                        ss.student_id, 
-                        s.first_name, 
-                        s.last_name, 
-                        SUM(ss.grade) AS total_grades, 
-                        COUNT(ss.subject_id) AS total_subjects 
-                    FROM students_subjects AS ss
-                    INNER JOIN students AS s ON ss.student_id = s.id
-                    GROUP BY ss.student_id, s.first_name, s.last_name";
+            $sql = "SELECT student_id, 
+                       SUM(grade) AS total_grades, 
+                       COUNT(subject_id) AS total_subjects 
+                FROM students_subjects 
+                GROUP BY student_id";
     
             $stmt = mysqli_prepare($conn, $sql);
             mysqli_stmt_execute($stmt);
