@@ -49,7 +49,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['student_id']) && isse
                 <ol class="breadcrumb">
                     <li class="breadcrumb-item"><a href="../dashboard.php">Dashboard</a></li>
                     <li class="breadcrumb-item"><a href="register.php">Register Student</a></li>
-                    <li class="breadcrumb-item"><a href="attach-subject.php">Attach Subject to Student</a></li>
+                    <?php if (isset($studentToDelete)): ?>
+                        <li class="breadcrumb-item">
+                            <a href="attach-subject.php?student_id=<?= htmlspecialchars($studentToDelete['student_id']); ?>">Attach Subject to Student</a>
+                        </li>
+                    <?php endif; ?>
                     <li class="breadcrumb-item active" aria-current="page">Detach Subject from Student</li>
                 </ol>
             </nav>
