@@ -689,6 +689,49 @@
         }
     }
     
+    function calculateTotalPassedAndFailedStudents() {
+        try {
+            $conn = con(); 
+    
+            $sql = "SELECT 
+                        ss.student_id, 
+                        s.first_name, 
+                        s.last_name, 
+                        SUM(ss.grade) AS total_grades, 
+                        COUNT(ss.subject_id) AS total_subjects 
+                    FROM students_subjects AS ss
+                    INNER JOIN students AS s ON ss.student_id = s.id
+                    GROUP BY ss.student_id, s.first_name, s.last_name";
+    
+            $stmt = mysqli_prepare($conn, $sql);
+            mysqli_stmt_execute($stmt);
+            $result = mysqli_stmt_get_result($stmt);
+    
+            $passed = 0;
+            $failed = 0;
+    
+            while ($row = mysqli_fetch_assoc($result)) {
+                $average_grade = $row['total_grades'] / $row['total_subjects'];
+    
+                if ($average_grade >= 75) {
+                    $passed++;
+                } else {
+                    $failed++;
+                }
+            }
+    
+            mysqli_stmt_close($stmt);
+            mysqli_close($conn);
+    
+            return [
+                'passed' => $passed,
+                'failed' => $failed
+            ];
+        } catch (Exception $e) {
+            return "Error: " . $e->getMessage();
+        }
+    }
+    
     
     
     
