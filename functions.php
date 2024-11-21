@@ -597,16 +597,16 @@
         $conn = con();
         $subjects = [];
         
-        // Prepare the SQL query to get subjects attached to the student
-        $sql = "SELECT s.subject_code, s.subject_name
+      
+        $sql = "SELECT s.subject_code, s.subject_name, ss.grade
                 FROM subjects s
-                INNER JOIN students_subjects ss ON s.subject_code = ss.subject_id
+                INNER JOIN students_subjects ss ON s.id = ss.subject_id
                 WHERE ss.student_id = ?";
         
         $stmt = mysqli_prepare($conn, $sql);
         
         if ($stmt) {
-            mysqli_stmt_bind_param($stmt, "s", $student_id);
+            mysqli_stmt_bind_param($stmt, "i", $student_id);
             mysqli_stmt_execute($stmt);
             $result = mysqli_stmt_get_result($stmt);
             
