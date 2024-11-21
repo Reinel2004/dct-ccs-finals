@@ -11,10 +11,6 @@ include '../../functions.php';
 //     exit;
 // }
 
-// header("Cache-Control: no-store, no-cache, must-revalidate");
-// header("Cache-Control: post-check=0, pre-check=0", false);
-// header("Pragma: no-cache");
-
 $student_id = $_GET['student_id'] ?? null;
 $errors = [];
 
@@ -43,7 +39,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 $attachedSubjects = getAttachedSubjectsByStudentId($student_id);
 
 // Fetch all subjects
-$allSubjects = getAllSubjects();
+$allSubjects = getAllSubjects();  // No argument passed here, as the function doesn't need one
 $attachedSubjectCodes = array_column($attachedSubjects, 'subject_code');
 $availableSubjects = array_filter($allSubjects, function ($subject) use ($attachedSubjectCodes) {
     return !in_array($subject['subject_code'], $attachedSubjectCodes);
