@@ -440,32 +440,27 @@
         return false; 
     }
 
-    function getSelectedSubjectByCode($subject_code) {
-        $conn = con();
-        $sql = "SELECT * FROM subjects WHERE subject_code = ?";
-        $stmt = mysqli_prepare($conn, $sql);
-    
-        if ($stmt) {
-            mysqli_stmt_bind_param($stmt, "s", $subject_code);
-            mysqli_stmt_execute($stmt);
-    
-            $result = mysqli_stmt_get_result($stmt);
-    
-            if ($result && mysqli_num_rows($result) > 0) {
-                $subject = mysqli_fetch_assoc($result);
-                mysqli_stmt_close($stmt);
-                mysqli_close($conn);
-                return $subject;
-            } else {
-                mysqli_stmt_close($stmt);
-                mysqli_close($conn);
-                return null;
-            }
+    function getSelectedSubjectById($subject_id) {
+        $conn = con();  // Database connection
+        
+        // SQL query to fetch subject details by subject_id
+        $query = "SELECT * FROM subjects WHERE id = ?";
+        $stmt = mysqli_prepare($conn, $query);
+        mysqli_stmt_bind_param($stmt, "i", $subject_id);
+        mysqli_stmt_execute($stmt);
+        $result = mysqli_stmt_get_result($stmt);
+        
+        if ($row = mysqli_fetch_assoc($result)) {
+            mysqli_stmt_close($stmt);
+            mysqli_close($conn);
+            return $row;  // Return subject details
         }
     
+        mysqli_stmt_close($stmt);
         mysqli_close($conn);
-        return null; 
+        return false;  // Return false if no subject found
     }
+    
     
 
     function deleteSubjectByCode($subject_code) {
@@ -553,15 +548,15 @@
     function getSubjectIdByCode($subject_code) {
         $conn = con();  // Database connection
         
-        // Correct query to fetch subject_id using subject_code
-        $query = "SELECT subject_id FROM subjects WHERE subject_code = ?";
+        // Correct query to fetch id using subject_code
+        $query = "SELECT id FROM subjects WHERE subject_code = ?";
         $stmt = mysqli_prepare($conn, $query);
         mysqli_stmt_bind_param($stmt, "s", $subject_code);
         mysqli_stmt_execute($stmt);
         $result = mysqli_stmt_get_result($stmt);
         
         if ($row = mysqli_fetch_assoc($result)) {
-            return $row['subject_id'];  // Return subject_id if found
+            return $row['id'];  // Return the correct column (id) from subjects table
         }
     
         return false;
