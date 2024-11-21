@@ -486,26 +486,25 @@
         }
     }
 
-    function attachSubjectToStudent($student_id, $subject_code) {
+    function attachSubjectToStudent($student_id, $subject_id) {
         $conn = con();
     
         $errors = [];
         if (empty($student_id)) {
             $errors[] = "Student ID is required.";
         }
-        if (empty($subject_code)) {
-            $errors[] = "Subject Code is required.";
+        if (empty($subject_id)) {
+            $errors[] = "Subject ID is required.";
         }
     
-       
         $student = getSelectedStudentById($student_id);
-        $subject = getSelectedSubjectByCode($subject_code);
+        $subject = getSelectedSubjectById($subject_id);
     
         if (!$student) {
             $errors[] = "Student ID not found.";
         }
         if (!$subject) {
-            $errors[] = "Subject Code not found.";
+            $errors[] = "Subject ID not found.";
         }
     
         if (!empty($errors)) {
@@ -513,10 +512,10 @@
             return false;
         }
     
-       
-        $sql_check = "SELECT * FROM student_subjects WHERE student_id = ? AND subject_code = ?";
+        // Check if the student is already attached to the subject
+        $sql_check = "SELECT * FROM students_subjects WHERE student_id = ? AND subject_id = ?";
         $stmt_check = mysqli_prepare($conn, $sql_check);
-        mysqli_stmt_bind_param($stmt_check, "ss", $student_id, $subject_code);
+        mysqli_stmt_bind_param($stmt_check, "ii", $student_id, $subject_id);
         mysqli_stmt_execute($stmt_check);
         $result_check = mysqli_stmt_get_result($stmt_check);
     
@@ -528,15 +527,17 @@
         }
         mysqli_stmt_close($stmt_check);
     
-        $sql = "INSERT INTO student_subjects (student_id, subject_code) VALUES (?, ?)";
+       
+        $sql = "INSERT INTO students_subjects (student_id, subject_id, grade) VALUES (?, ?, ?)";
         $stmt = mysqli_prepare($conn, $sql);
     
         if ($stmt) {
-            mysqli_stmt_bind_param($stmt, "ss", $student_id, $subject_code);
+            $grade = 0; 
+            mysqli_stmt_bind_param($stmt, "iis", $student_id, $subject_id, $grade);
             if (mysqli_stmt_execute($stmt)) {
                 mysqli_stmt_close($stmt);
                 mysqli_close($conn);
-                return true; 
+                return true;
             } else {
                 echo "Error attaching subject: " . mysqli_error($conn);
             }
@@ -545,8 +546,9 @@
         }
     
         mysqli_close($conn);
-        return false; 
+        return false;
     }
+    
     
 
 
