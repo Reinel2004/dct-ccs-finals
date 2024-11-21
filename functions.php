@@ -84,7 +84,7 @@
 
     function guardDashboard(){
         $loginPage = '../index.php';
-        if(isset($_SESSION['email'])){
+        if(!isset($_SESSION['email'])){
             header("Location: $loginPage");
         }
     }
@@ -92,6 +92,15 @@
     function checkUserSessionIsActive() {
         $dashboardPage = 'admin/dashboard.php';
         $indexPage = 'index.php';
+        if (isset($_SESSION['email']) && basename($_SERVER['PHP_SELF']) == $indexPage) {
+            header("Location: $dashboardPage");
+            exit;
+        }
+    }
+
+    function checkUserSessionIsActiveDashboard() {
+        $dashboardPage = 'admin/dashboard.php';
+        $indexPage = '../index.php';
         if (isset($_SESSION['email']) && basename($_SERVER['PHP_SELF']) == $indexPage) {
             header("Location: $dashboardPage");
             exit;
