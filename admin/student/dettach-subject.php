@@ -74,9 +74,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['student_id']) && isse
                         <form method="POST">
                             <input type="hidden" name="student_id" value="<?= htmlspecialchars($studentToDelete['student_id']) ?>">
                             <input type="hidden" name="subject_code" value="<?= htmlspecialchars($subjectToDetach['subject_code']) ?>">
-                            <button type="button" class="btn btn-secondary" onclick="window.location.href='register.php';">Cancel</button>
+                            <button type="button" class="btn btn-secondary" onclick="window.location.href='attach-subject.php?student_id=<?= htmlspecialchars($studentToDelete['student_id']); ?>'">
+                                Cancel
+                            </button>
                             <button type="submit" class="btn btn-primary">Detach Subject from Student</button>
                         </form>
+
                     <?php else: ?>
                         <p class="text-danger">Student or subject not found.</p>
                         <a href="attach-subject.php" class="btn btn-primary">Back to Student List</a>
