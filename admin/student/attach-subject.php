@@ -5,6 +5,7 @@ $pageTitle = "Attach Subject to Student";
 include '../partials/header.php';
 include '../../functions.php';
 
+
 // Uncomment the session validation if necessary
 // if (empty($_SESSION['email'])) {
 //     header("Location: ../index.php");
@@ -39,7 +40,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 $attachedSubjects = getAttachedSubjectsByStudentId($student_id);
 
 // Fetch all subjects
-$allSubjects = getAllSubjects();  // No argument passed here, as the function doesn't need one
+$allSubjects = getAllSubjects();
 $attachedSubjectCodes = array_column($attachedSubjects, 'subject_code');
 $availableSubjects = array_filter($allSubjects, function ($subject) use ($attachedSubjectCodes) {
     return !in_array($subject['subject_code'], $attachedSubjectCodes);
@@ -75,13 +76,13 @@ $availableSubjects = array_filter($allSubjects, function ($subject) use ($attach
             <?php endif; ?>
 
             <?php if ($studentToAttach): ?>
-                <div class="container">
+             
                     <h3>Selected Student Information</h3>
                     <ul>
                         <li><strong>Student ID:</strong> <?= htmlspecialchars($studentToAttach['student_id']) ?></li>
                         <li><strong>Name:</strong> <?= htmlspecialchars($studentToAttach['first_name'] . ' ' . $studentToAttach['last_name']) ?></li>
                     </ul>
-                </div>
+                
             <?php endif; ?>
 
             <hr>
@@ -123,19 +124,23 @@ $availableSubjects = array_filter($allSubjects, function ($subject) use ($attach
                             <tr>
                                 <td><?= htmlspecialchars($subject['subject_code']); ?></td>
                                 <td><?= htmlspecialchars($subject['subject_name']); ?></td>
+                                <td><?= htmlspecialchars($subject['grade']); ?></td>
                                 <td>
-                                    <a href="detach-subject.php?student_id=<?= urlencode($student_id) ?>&subject_id=<?= urlencode($subject['subject_id']) ?>" class="btn btn-danger btn-sm">Detach Subject</a>
+                                    <a href="#" class="btn btn-danger btn-sm">Detach Subject</a>
+                                    <a href="#" class="btn btn-success btn-sm">Assign Grade</a>
                                 </td>
-                                <td><a href="#" class="btn btn-primary btn-sm">Assign Grade</a></td>
+                               
                             </tr>
                         <?php endforeach; ?>
                     <?php else: ?>
                         <tr>
-                            <td colspan="3" class="text-center">No subjects attached.</td>
+                            <td colspan="4" class="text-center">No subjects attached.</td>
                         </tr>
                     <?php endif; ?>
                 </tbody>
-            </table>
+</table>
+
+
         </div>
     </div>
 </div>
