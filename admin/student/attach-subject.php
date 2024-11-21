@@ -1,12 +1,22 @@
 <?php
 session_start();
-$pageTitle = "Attach Subject to Student";
-include('../../functions.php');
-include('../partials/header.php');
+$pageTitle = "Attach Subject";
+require_once '../../functions.php';
+require_once '../partials/header.php';
 
 $studentToAttach = null;
 $errors = [];
 
+// Load subjects into the session from the database if not already set
+if (!isset($_SESSION['subject_data']) || empty($_SESSION['subject_data'])) {
+    $conn = con();
+    $sql = "SELECT * FROM subjects";
+    $result = mysqli_query($conn, $sql);
+    $_SESSION['subject_data'] = mysqli_fetch_all($result, MYSQLI_ASSOC);
+    mysqli_close($conn);
+}
+
+// Retrieve student ID from GET or POST
 if (isset($_GET['student_id'])) {
     $student_id = sanitize_input($_GET['student_id']);
 } elseif (isset($_POST['student_id'])) {
@@ -15,8 +25,8 @@ if (isset($_GET['student_id'])) {
     $errors[] = "No student selected.";
 }
 
-if (isset($student_id) && !empty($student_id)) {
-   
+// Find the selected student in the session data
+if (!empty($student_id)) {
     if (!empty($_SESSION['student_data'])) {
         foreach ($_SESSION['student_data'] as $student) {
             if ($student['student_id'] === $student_id) {
@@ -32,32 +42,25 @@ if (isset($student_id) && !empty($student_id)) {
     $errors[] = "Student ID is missing.";
 }
 
+// Handle form submission
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    if (!$student_id) {
-        $errors[] = 'No student ID provided.';
-    } elseif (isset($_POST['subject_codes']) && !empty($_POST['subject_codes'])) {
+    if (isset($_POST['subject_codes']) && !empty($_POST['subject_codes'])) {
         // Sanitize and collect selected subject codes
         $subject_codes = array_map('sanitize_input', $_POST['subject_codes']);
 
-        // Initialize session array for attached subjects if not already set
+        // Ensure the session is prepared for subject attachment
         if (!isset($_SESSION['attached_subjects'])) {
             $_SESSION['attached_subjects'] = [];
         }
 
-        // Initialize the array for the specific student if not set
         if (!isset($_SESSION['attached_subjects'][$student_id])) {
             $_SESSION['attached_subjects'][$student_id] = [];
         }
 
-        // Attach the selected subjects to the student
-        $_SESSION['attached_subjects'][$student_id] = array_merge(
-            $_SESSION['attached_subjects'][$student_id],
-            $subject_codes
+        // Attach subjects and ensure no duplicates
+        $_SESSION['attached_subjects'][$student_id] = array_unique(
+            array_merge($_SESSION['attached_subjects'][$student_id], $subject_codes)
         );
-
-        // Remove duplicates by making the list unique
-        $_SESSION['attached_subjects'][$student_id] = array_unique($_SESSION['attached_subjects'][$student_id]);
-
     } else {
         $errors[] = 'At least one subject should be selected.';
     }
