@@ -82,6 +82,13 @@
         }
     }
 
+    function guardDashboard(){
+        $loginPage = '../index.php';
+        if(isset($_SESSION['email'])){
+            header("Location: $loginPage");
+        }
+    }
+
     function checkUserSessionIsActive() {
         $dashboardPage = 'admin/dashboard.php';
         $indexPage = 'index.php';
